@@ -88,4 +88,30 @@ public class CustomerService {
                 customer.getAddress()
         );
     }
+    public CustomerResponse updateCustomer(String customerId, CustomerRequest request) {
+        Customer existingCustomer = customerRepository.findById(customerId);
+        if (existingCustomer == null) {
+            return null;
+        }
+        existingCustomer.setFirstName(request.getFirstName());
+        existingCustomer.setLastName(request.getLastName());
+        existingCustomer.setAge(request.getAge());
+        existingCustomer.setGender(request.getGender());
+        existingCustomer.setEmail(request.getEmail());
+        existingCustomer.setMobileNumber(request.getMobileNumber());
+        existingCustomer.setPanNumber(request.getPanNumber());
+        existingCustomer.setAddress(request.getAddress());
+        customerRepository.save(existingCustomer);
+        return new CustomerResponse(
+                existingCustomer.getCustomerId(),
+                existingCustomer.getFirstName(),
+                existingCustomer.getLastName(),
+                existingCustomer.getAge(),
+                existingCustomer.getGender(),
+                existingCustomer.getEmail(),
+                existingCustomer.getMobileNumber(),
+                existingCustomer.getPanNumber(),
+                existingCustomer.getAddress()
+        );
+    }
 }

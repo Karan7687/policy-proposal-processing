@@ -45,5 +45,19 @@ public class CustomerController {
         }
 
         return ResponseEntity.ok(customer);
-    }   
+    }
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable("customerId") String customerId,
+            @RequestBody CustomerRequest request) {
+
+        CustomerResponse response =
+                customerService.updateCustomer(customerId, request);
+
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(response);
+    }
 }
