@@ -5,6 +5,8 @@ import com.hdfclife.policyproposal.dto.CustomerResponse;
 import com.hdfclife.policyproposal.model.Customer;
 import com.hdfclife.policyproposal.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,5 +50,22 @@ public class CustomerService {
                 customer.getPanNumber(),
                 customer.getAddress()
         );
+    }
+    public List<CustomerResponse> getAllCustomers() {
+
+        return customerRepository.findAll()
+                .stream()
+                .map(customer -> new CustomerResponse(
+                        customer.getCustomerId(),
+                        customer.getFirstName(),
+                        customer.getLastName(),
+                        customer.getAge(),
+                        customer.getGender(),
+                        customer.getEmail(),
+                        customer.getMobileNumber(),
+                        customer.getPanNumber(),
+                        customer.getAddress()
+                ))
+                .collect(Collectors.toList());
     }
 }
