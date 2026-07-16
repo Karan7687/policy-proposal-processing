@@ -68,4 +68,24 @@ public class CustomerService {
                 ))
                 .collect(Collectors.toList());
     }
+    public CustomerResponse getCustomerById(String customerId) {
+
+        Customer customer = customerRepository.findById(customerId);
+
+        if (customer == null) {
+            return null;
+        }
+
+        return new CustomerResponse(
+                customer.getCustomerId(),
+                customer.getFirstName(),
+                customer.getLastName(),
+                customer.getAge(),
+                customer.getGender(),
+                customer.getEmail(),
+                customer.getMobileNumber(),
+                customer.getPanNumber(),
+                customer.getAddress()
+        );
+    }
 }

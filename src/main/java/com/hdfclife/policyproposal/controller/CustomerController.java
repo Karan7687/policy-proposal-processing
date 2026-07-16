@@ -34,4 +34,16 @@ public class CustomerController {
 
         return ResponseEntity.ok(customers);
     }
+    @GetMapping("/{customerId}")
+    public ResponseEntity<CustomerResponse> getCustomerById(
+            @PathVariable("customerId") String customerId) {
+
+        CustomerResponse customer = customerService.getCustomerById(customerId);
+
+        if (customer == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(customer);
+    }   
 }
