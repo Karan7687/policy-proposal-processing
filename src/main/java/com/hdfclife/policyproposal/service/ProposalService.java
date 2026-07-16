@@ -11,8 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class ProposalService {
 
+    //injction
     private final ProposalRepository proposalRepository;
-
+    private final AuditService auditService;
     private static final AtomicInteger PROPOSAL_SEQUENCE =
             new AtomicInteger(1000);
     private static final AtomicInteger POLICY_SEQUENCE =
@@ -25,8 +26,9 @@ POL1002
 POL1003
     * */
 
-    public ProposalService(ProposalRepository proposalRepository) {
+    public ProposalService(ProposalRepository proposalRepository, AuditService auditService) {
         this.proposalRepository = proposalRepository;
+        this.auditService = auditService;
     }
 
     public ProposalResponse createProposal(ProposalRequest request) {
@@ -46,6 +48,7 @@ POL1003
         );
 
         proposalRepository.save(proposal);
+
 
         return new ProposalResponse(
                 proposal.getProposalId(),
@@ -77,6 +80,10 @@ POL1003
                 "POL" + POLICY_SEQUENCE.incrementAndGet());
 
         proposalRepository.save(proposal);
+        auditService.createAudit(
+                proposal.getProposalId(),
+                "Proposal Submitted"
+        );
 
         return new ProposalResponse(
                 proposal.getProposalId(),
