@@ -15,6 +15,15 @@ public class ProposalService {
 
     private static final AtomicInteger PROPOSAL_SEQUENCE =
             new AtomicInteger(1000);
+    private static final AtomicInteger POLICY_SEQUENCE =
+            new AtomicInteger(1000);
+    /*
+POL1001
+
+POL1002
+
+POL1003
+    * */
 
     public ProposalService(ProposalRepository proposalRepository) {
         this.proposalRepository = proposalRepository;
@@ -35,6 +44,37 @@ public class ProposalService {
                 "DRAFT",
                 null
         );
+
+        proposalRepository.save(proposal);
+
+        return new ProposalResponse(
+                proposal.getProposalId(),
+                proposal.getCustomerId(),
+                proposal.getPolicyTerm(),
+                proposal.getSumAssured(),
+                proposal.getAnnualPremium(),
+                proposal.getPaymentFrequency(),
+                proposal.getNomineeName(),
+                proposal.getStatus(),
+                proposal.getPolicyNumber()
+        );
+    }
+    public ProposalResponse submitProposal(String proposalId) {
+
+        Proposal proposal = proposalRepository.findById(proposalId);
+
+        if (proposal == null) {
+            return null;
+        }
+
+        if ("SUBMITTED".equals(proposal.getStatus())) {
+            return null;
+        }
+
+        proposal.setStatus("SUBMITTED");
+
+        proposal.setPolicyNumber(
+                "POL" + POLICY_SEQUENCE.incrementAndGet());
 
         proposalRepository.save(proposal);
 
