@@ -1,59 +1,79 @@
-# 🛡️ Policy Proposal Processing API
+# 🛡️ HDFC Life Policy Proposal Processing API
 
-A Spring Boot REST API that simulates the policy proposal lifecycle for a life insurance company. The application manages customers, insurance proposals, reference master data, and audit records using a clean layered architecture and in-memory storage.
+A Spring Boot REST API developed as part of the **HDFC Life Java Backend Assessment**.
 
-> Developed as part of the HDFC Life Java Backend Assessment.
+The application simulates the end-to-end policy proposal lifecycle for a life insurance company. It enables customer onboarding, proposal creation, proposal submission, reference data management, and audit tracking while enforcing business validations through a clean layered architecture.
 
 ---
 
-## 🚀 Features
+# 📖 Overview
 
-### 📋 Reference Master
-- Retrieve available policy terms
-- Retrieve payment frequency options
+This project demonstrates backend development concepts including:
 
-### 👤 Customer Management
+- RESTful API development
+- Layered Architecture
+- DTO Pattern
+- Business Rule Validation
+- Bean Validation
+- Global Exception Handling
+- Thread-safe In-Memory Repository
+- Audit Trail Generation
+
+The application intentionally uses **ConcurrentHashMap** instead of a database, as required by the assessment.
+
+---
+
+# 🚀 Features
+
+## 📋 Reference Master
+
+- Retrieve available Policy Terms
+- Retrieve available Payment Frequencies
+
+## 👤 Customer Management
+
 - Create Customer
-- Get All Customers
 - Get Customer by ID
-- Update Customer
 
-### 📄 Policy Proposal Management
+## 📄 Policy Proposal Management
+
 - Create Policy Proposal
-- Proposal starts with **DRAFT** status
+- Retrieve Proposal by ID
 - Submit Proposal
-- Automatically generate Policy Number
-- Change Proposal Status to **SUBMITTED**
+- Automatic Policy Number Generation
+- Proposal Status Management (DRAFT → SUBMITTED)
 
-### 📝 Audit Trail
+## 📝 Audit Management
+
 - Automatically records proposal submission
-- Maintains timestamped audit history
+- Retrieves audit history for a proposal
 
 ---
 
-# 🏗️ Project Architecture
+# 🏗️ Architecture
 
 ```
-Client (Postman)
-        │
-        ▼
-Controller
-        │
-        ▼
-Service
-        │
-        ▼
-Repository
-        │
-        ▼
-In-Memory Storage (ConcurrentHashMap)
+                 Client (Postman)
+                        │
+                        ▼
+                 REST Controller
+                        │
+                        ▼
+                  Service Layer
+        (Business Rules & Validation)
+                        │
+                        ▼
+                Repository Layer
+                        │
+                        ▼
+      ConcurrentHashMap (In-Memory Storage)
 ```
 
-The application follows a **Layered Architecture**, ensuring separation of concerns and maintainable code.
+The project follows a **Layered Architecture**, ensuring clear separation between API handling, business logic, and data persistence.
 
 ---
 
-# 📁 Project Structure
+# 📂 Project Structure
 
 ```
 src
@@ -61,34 +81,31 @@ src
     └── java
         └── com.hdfclife.policyproposal
             ├── controller
-            ├── service
-            ├── repository
-            ├── model
             ├── dto
-            ├── config
             ├── exception
-            ├── util
-            └── validation
+            ├── model
+            ├── repository
+            └── service
 ```
 
 ---
 
 # 🛠️ Technology Stack
 
-| Technology | Version |
+| Technology | Details |
 |------------|---------|
 | Java | 21 |
 | Spring Boot | 3.5.x |
-| Maven | Latest |
-| Lombok | Yes |
-| REST API | Spring Web |
-| Storage | Java ConcurrentHashMap |
-| Build Tool | Maven |
-| Testing Tool | Postman |
+| Spring Web | REST APIs |
+| Maven | Build Tool |
+| Lombok | Boilerplate Reduction |
+| Bean Validation | Jakarta Validation |
+| Storage | ConcurrentHashMap |
+| API Testing | Postman |
 
 ---
 
-# ⚙️ API Endpoints
+# 📌 REST APIs
 
 ## Reference Master
 
@@ -99,22 +116,21 @@ src
 
 ---
 
-## Customers
+## Customer
 
 | Method | Endpoint |
 |--------|----------|
 | POST | `/customers` |
-| GET | `/customers` |
 | GET | `/customers/{customerId}` |
-| PUT | `/customers/{customerId}` |
 
 ---
 
-## Proposals
+## Proposal
 
 | Method | Endpoint |
 |--------|----------|
 | POST | `/proposals` |
+| GET | `/proposals/{proposalId}` |
 | POST | `/proposals/{proposalId}/submit` |
 
 ---
@@ -123,7 +139,7 @@ src
 
 | Method | Endpoint |
 |--------|----------|
-| GET | `/audits` |
+| GET | `/audit/{proposalId}` |
 
 ---
 
@@ -137,13 +153,16 @@ Create Proposal
 (Status = DRAFT)
         │
         ▼
+Business Validation
+        │
+        ▼
 Submit Proposal
         │
         ▼
 Generate Policy Number
         │
         ▼
-Status = SUBMITTED
+Status → SUBMITTED
         │
         ▼
 Create Audit Record
@@ -151,18 +170,54 @@ Create Audit Record
 
 ---
 
+# ✅ Business Rules Implemented
+
+- Customer age must be between **18 and 65** years.
+- Customer must exist before creating a proposal.
+- Policy Term must be one of:
+    - 10 Years
+    - 15 Years
+    - 20 Years
+    - 25 Years
+    - 30 Years
+- Sum Assured must be between **₹100,000** and **₹50,000,000**.
+- Annual Premium must be at least **₹5,000**.
+- PAN is mandatory if Annual Premium exceeds **₹50,000**.
+- Payment Frequency must exist in Reference Master.
+- Customer cannot be the nominee.
+- Proposal is initially created with **DRAFT** status.
+- A proposal can only be submitted once.
+- Policy Number is generated only after successful submission.
+- Every successful submission creates an Audit Record.
+
+---
+
+# ⚠️ Exception Handling
+
+Centralized exception handling has been implemented using **@ControllerAdvice**.
+
+Handled scenarios include:
+
+- Resource Not Found (404)
+- Business Validation Failure (400)
+- Bean Validation Failure (400)
+- Invalid Request Body (400)
+- Internal Server Error (500)
+
+---
+
 # 📌 Sample Customer Request
 
 ```json
 {
-  "firstName": "Karan",
-  "lastName": "Kamble",
-  "age": 22,
+  "firstName": "Rohan",
+  "lastName": "Deshmukh",
+  "age": 28,
   "gender": "Male",
-  "email": "karan.kamble@gmail.com",
+  "email": "rohan.deshmukh97@example.com",
   "mobileNumber": "9876543210",
   "panNumber": "ABCDE1234F",
-  "address": "Pune"
+  "address": "Baner, Pune"
 }
 ```
 
@@ -176,8 +231,8 @@ Create Audit Record
   "policyTerm": 20,
   "sumAssured": 1000000,
   "annualPremium": 25000,
-  "paymentFrequency": "YEARLY",
-  "nomineeName": "Vaishnavi Kamble"
+  "paymentFrequency": "MONTHLY",
+  "nomineeName": "Priya Deshmukh"
 }
 ```
 
@@ -209,7 +264,7 @@ Run the application
 mvn spring-boot:run
 ```
 
-Application starts on
+Application URL
 
 ```
 http://localhost:8081
@@ -217,45 +272,49 @@ http://localhost:8081
 
 ---
 
-# 🧪 API Testing
+# 🧪 Testing
 
-All APIs were tested using **Postman**.
+The application was manually tested using **Postman**.
 
-Recommended execution order:
+Testing included:
 
-1. Get Reference Master
-2. Create Customer
-3. Get Customer
-4. Update Customer
-5. Create Proposal
-6. Submit Proposal
-7. View Audit Logs
+- Customer APIs
+- Proposal APIs
+- Audit APIs
+- Reference Master APIs
+- Bean Validation
+- Business Rule Validation
+- Exception Handling
+- End-to-End Proposal Lifecycle
 
 ---
 
-# 💡 Design Decisions
+# 💡 Design Highlights
 
 - Layered Architecture (Controller → Service → Repository)
-- Constructor-based Dependency Injection
-- DTO Pattern for request and response models
-- Thread-safe in-memory storage using `ConcurrentHashMap`
+- Constructor-Based Dependency Injection
+- DTO Pattern for API contracts
+- Thread-safe In-Memory Repository using ConcurrentHashMap
 - AtomicInteger for unique ID generation
-- ResponseEntity for proper HTTP responses
+- Bean Validation for request validation
+- Service-layer business validation
+- Global exception handling using @ControllerAdvice
+- ResponseEntity for consistent HTTP responses
 - Lombok to reduce boilerplate code
 
 ---
 
 # 📈 Future Enhancements
 
-- Database integration (PostgreSQL/MySQL)
+- MySQL/PostgreSQL Integration
 - Spring Data JPA
-- Bean Validation (`@Valid`)
-- Global Exception Handling
 - JWT Authentication & Authorization
-- Unit & Integration Testing
-- Docker Support
-- Swagger/OpenAPI Documentation
-- Logging Framework (SLF4J)
+- Swagger / OpenAPI Documentation
+- Docker Containerization
+- CI/CD Pipeline
+- Persistent Audit Storage
+- Logging using SLF4J
+- Enhanced Unit & Integration Test Coverage
 
 ---
 
@@ -264,5 +323,3 @@ Recommended execution order:
 **Karan Kamble**
 
 Java Backend Developer
-
----
