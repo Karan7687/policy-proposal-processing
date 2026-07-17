@@ -97,4 +97,24 @@ POL1003
                 proposal.getPolicyNumber()
         );
     }
+    public ProposalResponse getProposalById(String proposalId) {
+
+        Proposal proposal = proposalRepository.findById(proposalId);
+
+        if (proposal == null) {
+            return null;
+        }
+
+        return new ProposalResponse(
+                proposal.getProposalId(),
+                proposal.getCustomerId(),
+                proposal.getPolicyTerm(),
+                proposal.getSumAssured(),
+                proposal.getAnnualPremium(),
+                proposal.getPaymentFrequency(),
+                proposal.getNomineeName(),
+                proposal.getStatus(),
+                proposal.getPolicyNumber()
+        );
+    }
 }

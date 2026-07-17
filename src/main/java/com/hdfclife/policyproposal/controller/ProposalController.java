@@ -25,6 +25,18 @@ public class ProposalController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    @GetMapping("/{proposalId}")
+    public ResponseEntity<ProposalResponse> getProposalById(
+            @PathVariable("proposalId") String proposalId) {
+
+        ProposalResponse response = proposalService.getProposalById(proposalId);
+
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(response);
+    }
     @PostMapping("/{proposalId}/submit")
     public ResponseEntity<ProposalResponse> submitProposal(
             @PathVariable("proposalId") String proposalId) {
