@@ -3,6 +3,7 @@ package com.hdfclife.policyproposal.controller;
 import com.hdfclife.policyproposal.dto.CustomerRequest;
 import com.hdfclife.policyproposal.dto.CustomerResponse;
 import com.hdfclife.policyproposal.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +22,13 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<CustomerResponse> createCustomer(
-            @RequestBody CustomerRequest request) {
+            @Valid @RequestBody CustomerRequest request) {
 
         CustomerResponse response = customerService.createCustomer(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @GetMapping
     public ResponseEntity<List<CustomerResponse>> getAllCustomers() {
 
@@ -34,6 +36,7 @@ public class CustomerController {
 
         return ResponseEntity.ok(customers);
     }
+
     @GetMapping("/{customerId}")
     public ResponseEntity<CustomerResponse> getCustomerById(
             @PathVariable("customerId") String customerId) {
@@ -46,10 +49,11 @@ public class CustomerController {
 
         return ResponseEntity.ok(customer);
     }
+
     @PutMapping("/{customerId}")
     public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable("customerId") String customerId,
-            @RequestBody CustomerRequest request) {
+            @Valid @RequestBody CustomerRequest request) {
 
         CustomerResponse response =
                 customerService.updateCustomer(customerId, request);

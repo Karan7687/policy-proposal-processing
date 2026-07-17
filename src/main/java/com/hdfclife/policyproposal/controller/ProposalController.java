@@ -3,6 +3,7 @@ package com.hdfclife.policyproposal.controller;
 import com.hdfclife.policyproposal.dto.ProposalRequest;
 import com.hdfclife.policyproposal.dto.ProposalResponse;
 import com.hdfclife.policyproposal.service.ProposalService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +20,17 @@ public class ProposalController {
 
     @PostMapping
     public ResponseEntity<ProposalResponse> createProposal(
-            @RequestBody ProposalRequest request) {
+            @Valid @RequestBody ProposalRequest request) {
 
         ProposalResponse response = proposalService.createProposal(request);
 
+        if (response == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @GetMapping("/{proposalId}")
     public ResponseEntity<ProposalResponse> getProposalById(
             @PathVariable("proposalId") String proposalId) {
@@ -37,6 +43,7 @@ public class ProposalController {
 
         return ResponseEntity.ok(response);
     }
+
     @PostMapping("/{proposalId}/submit")
     public ResponseEntity<ProposalResponse> submitProposal(
             @PathVariable("proposalId") String proposalId) {
