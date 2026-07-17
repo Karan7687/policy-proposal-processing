@@ -1,6 +1,10 @@
-# 🛡️ Policy Proposal Processing API
+# 🛡️ HDFC Life Policy Proposal Processing API
 
+<<<<<<< HEAD
 A Spring Boot REST API developed as part of the **Java Backend Assessment**.
+=======
+A Spring Boot REST API developed as part of the **HDFC Life Java Backend Assessment**.
+>>>>>>> 69f3f50 (doc: create API_Documentation)
 
 The application simulates the end-to-end policy proposal lifecycle for a life insurance company. It enables customer onboarding, proposal creation, proposal submission, reference data management, and audit tracking while enforcing business validations through a clean layered architecture.
 
@@ -322,4 +326,8 @@ Testing included:
 
 **Karan Kamble**
 
+<<<<<<< HEAD
 Java Backend Developer
+=======
+Java Backend Developer
+>>>>>>> 69f3f50 (doc: create API_Documentation)
