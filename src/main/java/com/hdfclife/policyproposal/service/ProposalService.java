@@ -2,6 +2,7 @@ package com.hdfclife.policyproposal.service;
 
 import com.hdfclife.policyproposal.dto.ProposalRequest;
 import com.hdfclife.policyproposal.dto.ProposalResponse;
+import com.hdfclife.policyproposal.exception.ResourceNotFoundException;
 import com.hdfclife.policyproposal.model.Proposal;
 import com.hdfclife.policyproposal.repository.CustomerRepository;
 import com.hdfclife.policyproposal.repository.ProposalRepository;
@@ -40,7 +41,9 @@ public class ProposalService {
         System.out.println("Customer Exists: " + customerRepository.existsById(request.getCustomerId()));
         // Business Validation 1 - Customer must exist
         if (!customerRepository.existsById(request.getCustomerId())) {
-            return null;
+            throw new ResourceNotFoundException(
+                    "Customer not found with ID: " + request.getCustomerId()
+            );
         }
 
         String proposalId = "PROP" + PROPOSAL_SEQUENCE.incrementAndGet();

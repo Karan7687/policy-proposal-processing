@@ -24,10 +24,6 @@ public class ProposalController {
 
         ProposalResponse response = proposalService.createProposal(request);
 
-        if (response == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -50,10 +46,6 @@ public class ProposalController {
 
         ProposalResponse response =
                 proposalService.submitProposal(proposalId);
-
-        if (response == null) {
-            return ResponseEntity.notFound().build();
-        }
 
         return ResponseEntity.ok(response);
     }
