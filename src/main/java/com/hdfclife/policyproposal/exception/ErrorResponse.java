@@ -9,7 +9,10 @@ public class ErrorResponse {
     private String error;
     private String path;
 
-    public ErrorResponse(LocalDateTime timestamp, int status, String error, String path) {
+    public ErrorResponse(LocalDateTime timestamp,
+                         int status,
+                         String error,
+                         String path) {
         this.timestamp = timestamp;
         this.status = status;
         this.error = error;

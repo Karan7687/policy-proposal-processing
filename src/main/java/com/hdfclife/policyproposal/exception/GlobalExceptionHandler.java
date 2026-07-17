@@ -5,18 +5,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -24,14 +25,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ResourceNotFoundException ex,
             HttpServletRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(BusinessValidationException.class)
@@ -39,18 +40,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             BusinessValidationException ex,
             HttpServletRequest request) {
 
-        HttpStatus status = ex.getStatus() != null
-                ? ex.getStatus()
-                : HttpStatus.BAD_REQUEST;
-
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
-                status.value(),
+                HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(status).body(errorResponse);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -60,20 +57,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
 
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining("; "));
+        Map<String, String> validationErrors = new HashMap<>();
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                message,
-                request.getDescription(false).replace("uri=", "")
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            validationErrors.put(
+                    error.getField(),
+                    error.getDefaultMessage()
+            );
+        }
+
+        return new ResponseEntity<>(
+                validationErrors,
+                HttpStatus.BAD_REQUEST
         );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @Override
@@ -83,28 +79,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Malformed request body",
-                request.getDescription(false).replace("uri=", "")
+        return new ResponseEntity<>(
+                "Invalid request body.",
+                HttpStatus.BAD_REQUEST
         );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(
+    public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex,
             HttpServletRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Unexpected error",
+                ex.getMessage(),
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        return new ResponseEntity<>(
+                error,
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }

@@ -2,8 +2,6 @@ package com.hdfclife.policyproposal;
 
 import com.hdfclife.policyproposal.dto.CustomerRequest;
 import com.hdfclife.policyproposal.dto.ProposalRequest;
-import com.hdfclife.policyproposal.exception.BusinessValidationException;
-import com.hdfclife.policyproposal.exception.ResourceNotFoundException;
 import com.hdfclife.policyproposal.model.Customer;
 import com.hdfclife.policyproposal.repository.AuditRepository;
 import com.hdfclife.policyproposal.repository.CustomerRepository;
