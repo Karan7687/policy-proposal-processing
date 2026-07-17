@@ -1,5 +1,6 @@
 package com.hdfclife.policyproposal.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +16,9 @@ public class ProposalRequest {
     private Integer policyTerm;
 
     @NotNull(message = "Sum assured is required")
+
     @Min(value = 100000, message = "Sum assured must be at least 100000")
+    @Max(value = 50000000, message = "Sum assured must not exceed 50000000")
     private Double sumAssured;
 
     @NotNull(message = "Annual premium is required")

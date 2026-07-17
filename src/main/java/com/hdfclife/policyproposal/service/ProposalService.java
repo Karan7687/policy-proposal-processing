@@ -2,12 +2,15 @@ package com.hdfclife.policyproposal.service;
 
 import com.hdfclife.policyproposal.dto.ProposalRequest;
 import com.hdfclife.policyproposal.dto.ProposalResponse;
+import com.hdfclife.policyproposal.exception.BusinessValidationException;
 import com.hdfclife.policyproposal.exception.ResourceNotFoundException;
+import com.hdfclife.policyproposal.model.Customer;
 import com.hdfclife.policyproposal.model.Proposal;
 import com.hdfclife.policyproposal.repository.CustomerRepository;
 import com.hdfclife.policyproposal.repository.ProposalRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -37,12 +40,46 @@ public class ProposalService {
 
     public ProposalResponse createProposal(ProposalRequest request) {
 
-        System.out.println("Customer ID Received: " + request.getCustomerId());
-        System.out.println("Customer Exists: " + customerRepository.existsById(request.getCustomerId()));
-        // Business Validation 1 - Customer must exist
+        // Customer must exist
         if (!customerRepository.existsById(request.getCustomerId())) {
             throw new ResourceNotFoundException(
                     "Customer not found with ID: " + request.getCustomerId()
+            );
+        }
+
+        Customer customer = customerRepository.findById(request.getCustomerId());
+
+        // Policy Term Validation
+        List<?> validTerms = referenceMasterService.getReferenceData("policy-term");
+        if (!validTerms.contains(request.getPolicyTerm())) {
+            throw new BusinessValidationException("Invalid policy term.");
+        }
+
+        // Payment Frequency Validation
+        List<?> validFrequencies =
+                referenceMasterService.getReferenceData("payment-frequency");
+
+        if (!validFrequencies.contains(request.getPaymentFrequency())) {
+            throw new BusinessValidationException("Invalid payment frequency.");
+        }
+
+        // PAN Validation
+        if (request.getAnnualPremium() > 50000 &&
+                (customer.getPanNumber() == null ||
+                        customer.getPanNumber().isBlank())) {
+
+            throw new BusinessValidationException(
+                    "PAN is mandatory when annual premium exceeds 50000."
+            );
+        }
+
+        // Nominee Validation
+        String customerName =
+                customer.getFirstName() + " " + customer.getLastName();
+
+        if (customerName.equalsIgnoreCase(request.getNomineeName())) {
+            throw new BusinessValidationException(
+                    "Nominee cannot be the customer."
             );
         }
 
@@ -80,11 +117,15 @@ public class ProposalService {
         Proposal proposal = proposalRepository.findById(proposalId);
 
         if (proposal == null) {
-            return null;
+            throw new ResourceNotFoundException(
+                    "Proposal not found with ID: " + proposalId
+            );
         }
 
         if ("SUBMITTED".equals(proposal.getStatus())) {
-            return null;
+            throw new BusinessValidationException(
+                    "Proposal has already been submitted."
+            );
         }
 
         proposal.setStatus("SUBMITTED");
@@ -117,7 +158,9 @@ public class ProposalService {
         Proposal proposal = proposalRepository.findById(proposalId);
 
         if (proposal == null) {
-            return null;
+            throw new ResourceNotFoundException(
+                    "Proposal not found with ID: " + proposalId
+            );
         }
 
         return new ProposalResponse(
